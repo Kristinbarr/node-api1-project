@@ -4,12 +4,12 @@ const server = express()
 
 server.use(express.json())
 
-// GET root test
+// GET - root test
 server.get('/', (req, res) => {
   res.send('hello world')
 })
 
-// GET users
+// GET - all users
 server.get('/api/users', (req, res) => {
   db.find()
     .then((users) => {
@@ -50,6 +50,19 @@ server.post('/api/users', (req, res) => {
     }
 })
 
+// DELETE
+
+server.delete('/api/users/:id', (req, res) => {
+  const id = req.params.id
+
+  db.remove(id)
+  .then(user => {
+    res.json(user)
+  })
+  .catch(error => {
+    res.json({message: 'error deleting user'})
+  })
+})
 
 
 const port = 8000

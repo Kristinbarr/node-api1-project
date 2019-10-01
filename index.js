@@ -20,5 +20,22 @@ server.get('/api/users', (req, res) => {
     })
 })
 
+// POST - insert new user to db
+server.post('/api/users', (req, res) => {
+  const users = req.body
+
+  if (!users.name) {
+    res.statusCode(400).json({message: 'users name not found'})
+  } else {
+  db.insert(users)
+    .then((user) => {
+      res.json(user)
+    })
+    .catch((error) => {
+      res.json({ message: 'error saving user' })
+    })
+    }
+})
+
 const port = 8000
 server.listen(port, () => console.log(`\n** API on port ${port} ** \n`))

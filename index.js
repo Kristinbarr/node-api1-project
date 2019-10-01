@@ -24,11 +24,11 @@ server.get('/api/users', (req, res) => {
 server.get('/api/users/:id', (req, res) => {
   const user = req.params.id
 
-    db.findById(user)
+  db.findById(user)
     .then((user) => {
       res.send(user)
     })
-    .catch(error => {
+    .catch((error) => {
       res.send(error)
     })
 })
@@ -38,32 +38,44 @@ server.post('/api/users', (req, res) => {
   const users = req.body
 
   if (!users.name) {
-    res.statusCode(400).json({message: 'users name not found'})
+    res.statusCode(400).json({ message: 'user name not found' })
   } else {
-  db.insert(users)
+    db.insert(users)
+      .then((user) => {
+        res.json(user)
+      })
+      .catch((error) => {
+        res.json({ message: 'error saving user' })
+      })
+  }
+})
+
+// PUT - update a users info with an id
+server.put('/api/users/:id', (req, res) => {
+  const id = req.params.id
+  const changes = req.body
+
+  db.update(id, changes)
     .then((user) => {
       res.json(user)
     })
     .catch((error) => {
-      res.json({ message: 'error saving user' })
+      res.json({ message: 'error updating user' })
     })
-    }
 })
 
-// DELETE
-
+// DELETE - delete a user by id
 server.delete('/api/users/:id', (req, res) => {
   const id = req.params.id
 
   db.remove(id)
-  .then(user => {
-    res.json(user)
-  })
-  .catch(error => {
-    res.json({message: 'error deleting user'})
-  })
+    .then((user) => {
+      res.json(user)
+    })
+    .catch((error) => {
+      res.json({ message: 'error deleting user' })
+    })
 })
-
 
 const port = 8000
 server.listen(port, () => console.log(`\n** API on port ${port} ** \n`))

@@ -20,6 +20,19 @@ server.get('/api/users', (req, res) => {
     })
 })
 
+// GET - get a single user by id
+server.get('/api/users/:id', (req, res) => {
+  const user = req.params.id
+
+    db.findById(user)
+    .then((user) => {
+      res.send(user)
+    })
+    .catch(error => {
+      res.send(error)
+    })
+})
+
 // POST - insert new user to db
 server.post('/api/users', (req, res) => {
   const users = req.body
@@ -36,6 +49,8 @@ server.post('/api/users', (req, res) => {
     })
     }
 })
+
+
 
 const port = 8000
 server.listen(port, () => console.log(`\n** API on port ${port} ** \n`))

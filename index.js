@@ -16,36 +16,51 @@ server.get('/api/users', (req, res) => {
       res.send(users)
     })
     .catch((error) => {
-      res.send(error)
+      res
+        .status(500)
+        .send({ error: 'The users information could not be retrieved.' })
     })
 })
 
 // GET - get a single user by id
 server.get('/api/users/:id', (req, res) => {
-  const user = req.params.id
+  const id = req.params.id
 
-  db.findById(user)
+  db.findById(id)
     .then((user) => {
-      res.send(user)
+      if (!user) {
+        res
+          .status(404)
+          .send({ message: 'The user with the specified ID does not exist.' })
+      } else {
+        res.send(user)
+      }
     })
     .catch((error) => {
-      res.send(error)
+      res
+        .status(500)
+        .send({ error: 'The user information could not be retrieved.' })
     })
 })
 
 // POST - insert new user to db
 server.post('/api/users', (req, res) => {
-  const users = req.body
+  const newuser = req.body
 
-  if (!users.name) {
-    res.statusCode(400).json({ message: 'user name not found' })
+  if (!newuser.name || !newuser.bio) {
+    // if req body obj is incorrect
+    res
+      .status(400)
+      .json({ errorMessage: 'Please provide name and bio for the user.' })
   } else {
-    db.insert(users)
+    db.insert(newuser) // pass a user obj, returns json obj with id
       .then((user) => {
-        res.json(user)
+        res.status(201).json(user)
       })
       .catch((error) => {
-        res.json({ message: 'error saving user' })
+        res.status(500).json({
+          error: 'There was an error while saving the user to the database'
+        })
       })
   }
 })
@@ -55,13 +70,25 @@ server.put('/api/users/:id', (req, res) => {
   const id = req.params.id
   const changes = req.body
 
-  db.update(id, changes)
-    .then((user) => {
-      res.json(user)
-    })
-    .catch((error) => {
-      res.json({ message: 'error updating user' })
-    })
+  if (!changes.name || !changes.bio) {
+    res
+      .status(400)
+      .json({ errorMessage: 'Please provide name and bio for the user.' })
+  } else {
+    db.update(id, changes)
+      .then((user) => {
+        if (user === 0) {
+          res
+            .status(404)
+            .json({ message: 'The user with the specified ID does not exist.' })
+        } else {
+          res.status(200).json(changes)
+        }
+      })
+      .catch((error) => {
+        res.status(500).json({ error: 'The user information could not be modified.' })
+      })
+  }
 })
 
 // DELETE - delete a user by id
@@ -70,10 +97,16 @@ server.delete('/api/users/:id', (req, res) => {
 
   db.remove(id)
     .then((user) => {
-      res.json(user)
+      if (!user) {
+        res
+          .status(404)
+          .json({ message: 'The user with the specified ID does not exist.' })
+      } else {
+        res.json(user)
+      }
     })
     .catch((error) => {
-      res.json({ message: 'error deleting user' })
+      res.status(500).json({ error: 'The user could not be removed' })
     })
 })
 
